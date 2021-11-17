@@ -41,7 +41,7 @@
 			so.addChild("當GUI的數值改變時，須將數值記錄起來", 2, true);
 			so.addChild("可使用按鍵P顯示目前紀錄的值", 1, true);
 			so.addChild("紀錄的數值儲存為JSON檔", 2, true);
-			so.addChild("可按鍵選擇上 / 下一隻角色，角色morph也要改變", 1, false);
+			so.addChild("可按鍵選擇上 / 下一隻角色，角色morph也要改變", 1, true);
 
 			//產生自評表，參數如下所示
 			so.renderModal(
@@ -109,6 +109,25 @@
 			    'models/mmd/KizunaAI_ver1.01/KizunaAI_ver1.01/kizunaai.pmx',
                 'models/mmd/『天宮こころ(Kokoro Amamiya)』/『天宮こころ(Kokoro Amamiya)』.pmx'
 		    ];
+			let checkFirst = true;
+
+			const vpdFiles = [
+				'models/mmd/vpds/01.vpd',
+				'models/mmd/vpds/02.vpd',
+				'models/mmd/vpds/03.vpd',
+				'models/mmd/vpds/04.vpd',
+				'models/mmd/vpds/05.vpd',
+				'models/mmd/vpds/06.vpd',
+				'models/mmd/vpds/07.vpd',
+				'models/mmd/vpds/08.vpd',
+				//'models/mmd/vpds/09.vpd',
+				//'models/mmd/vpds/10.vpd',
+				'models/mmd/vpds/11.vpd'
+			];
+
+			/*const gui2 = new GUI;
+		    const controls = {};
+			const stdlist = gui2.addFolder('stdlist');*/
 
 			const vpds = [];
 
@@ -118,7 +137,8 @@
 
 				init();
 				animate();
-                initGui2();
+                //initGui2();
+				readJSON();
 
 			} );
 
@@ -166,19 +186,6 @@
 
 				const modelFile = 'models/mmd/KizunaAI_ver1.01/KizunaAI_ver1.01/kizunaai.pmx';
 				//const modelFile = 'models/mmd/miku/miku_v2.pmd';
-				const vpdFiles = [
-					'models/mmd/vpds/01.vpd',
-					'models/mmd/vpds/02.vpd',
-					'models/mmd/vpds/03.vpd',
-					'models/mmd/vpds/04.vpd',
-					'models/mmd/vpds/05.vpd',
-					'models/mmd/vpds/06.vpd',
-					'models/mmd/vpds/07.vpd',
-					'models/mmd/vpds/08.vpd',
-					//'models/mmd/vpds/09.vpd',
-					//'models/mmd/vpds/10.vpd',
-					'models/mmd/vpds/11.vpd'
-				];
 
 				helper = new MMDAnimationHelper();
 
@@ -349,9 +356,19 @@
 				const gui2 = new GUI;
 				const controls = {};
 				const stdlist = gui2.addFolder('stdlist');
+				//console.log(stdlocal.length);
 
 				for (const key in standardlist) {
-                    controls[ key ] = -1;  //初始值 = -1
+					let i = 0;
+					if(checkFirst) {
+                        controls[ key ] = -1;  //初始值 = -1
+					}
+					else {
+						controls[ key ] = standardlist[ key ];
+						console.log(controls[ key ]);
+						//stdlocal[i] = standardlist[ key ];
+					}
+					i++;
 				}
 				for (const key in standardlist) {
 					//stdlist.name = "stdlist";
@@ -370,6 +387,17 @@
 				stdlist.open(); //在開啟網頁的時候直接展開
 			}
 
+			function deletedGUI(){
+                //htmlCollection = doc.getElementsByXXX();
+                let tag = document.getElementsByClassName("dg main a taller-than-window");
+                let i=0, n=0;
+                console.log(tag);
+                n = tag.length;
+                for(i=0; i < n; i++){
+                    tag[0].parentNode.removeChild(tag[0]);
+                }
+            }
+
 			document.onkeydown = function(event) {
 				if (event.keyCode == 83) {
                 	console.log('you click S!');
@@ -387,6 +415,8 @@
 					else if(modelState == 2) {
 						modelState = 1;
 					}  
+					deletedGUI();
+					//readJSON();
 					modelLoader();
 					//initGui2();
 				}
@@ -400,7 +430,9 @@
 					}     	    
 					else if(modelState == 2) {
                     	modelState = 0;
-					}	 
+					}	
+					deletedGUI();
+					//readJSON(); 
 					modelLoader();    
 					//initGui2();	    
 				}
@@ -481,6 +513,8 @@
 					}
 					//loadVpd();
 				}, onProgress, null);
+
+				readJSON();
 			}
 
 			function onProgress(xhr) {
@@ -489,6 +523,159 @@
 	            	console.log(Math.round(percentComplete, 2) + '% downloaded');
             	}
         	}
+
+			function readJSON() {
+				checkFirst = false;
+
+				var dataUrl;
+				if(modelState == 0) {
+					dataUrl= "./json/物述有栖_37Data.json";
+				}
+				else if(modelState == 1) {
+					dataUrl= "./json/kizunaai_37Data.json";
+				}
+				else if(modelState == 2){
+					dataUrl= "./json/天宮こころ_37Data.json";
+				}
+				var xhr = new XMLHttpRequest()
+				xhr.open('GET',dataUrl, true)
+				xhr.send()
+				xhr.onload = function(){
+					var dataset = JSON.parse(this.responseText);
+                    for(let i = 0; i < 37; i++) {
+						stdlocal[i] = dataset[textarray[i]];
+					    standardlist[textarray[i]] = dataset[textarray[i]];
+						//console.log(standardlist[textarray[i]]);
+					}
+					//console.log(stdlist);
+					//initGui();
+					initGui2();
+				}
+			}
+
+			function initGui() {
+
+				const gui = new GUI();
+
+				const dictionary = mesh.morphTargetDictionary;
+
+				const controls = {};
+				const keys = [];
+
+				const poses = gui.addFolder( 'Poses' );
+				const morphs = gui.addFolder( 'Morphs' );
+
+				function getBaseName( s ) {
+
+					return s.slice( s.lastIndexOf( '/' ) + 1 );
+
+				}
+
+				function initControls() {
+
+					for ( const key in dictionary ) {
+
+						controls[ key ] = 0.0;
+
+					}
+
+					controls.pose = - 1;
+
+					for ( let i = 0; i < vpdFiles.length; i ++ ) {
+
+						controls[ getBaseName( vpdFiles[ i ] ) ] = false;
+
+					}
+
+				}
+
+				function initKeys() {
+
+					for ( const key in dictionary ) {
+
+						keys.push( key );
+
+					}
+
+				}
+
+				function initPoses() {
+
+					const files = { default: - 1 };
+
+					for ( let i = 0; i < vpdFiles.length; i ++ ) {
+
+						files[ getBaseName( vpdFiles[ i ] ) ] = i;
+
+					}
+
+					poses.add( controls, 'pose', files ).onChange( onChangePose );
+
+				}
+
+				function initMorphs() {
+					var count = 0;
+					for ( const key in dictionary ) {
+
+						morphs.add( controls, key, 0.0, 1.0, 0.01 ).onChange( onChangeMorph );
+						count++;
+					}
+
+				}
+
+				function onChangeMorph() {
+
+					for ( let i = 0; i < keys.length; i ++ ) {
+
+						const key = keys[ i ];
+						const value = controls[ key ];
+						mesh.morphTargetInfluences[ i ] = value;
+
+					}
+
+				}
+
+				function onChangePose() {
+
+					const index = parseInt( controls.pose );
+
+					if ( index === - 1 ) {
+
+						mesh.pose();
+
+					} else {
+
+						helper.pose( mesh, vpds[ index ] );
+
+					}
+
+				}
+
+				var body = document.body;
+				function goRocket(e) {
+					if(e.keyCode == 80) {
+						for(let i = 0; i < 37; i++) {
+							console.log(textarray[i], stdlocal[i]);
+							//modelList[textarray[i]] = stdlocal[i];
+							//console.log(modelList.eyebrow_troubled_left);	
+						}
+						//console.log(modelList);	
+					}
+				}
+				body.addEventListener('keydown', goRocket, false);
+
+				initControls();
+				initKeys();
+				initPoses();
+				initMorphs();
+
+				onChangeMorph();
+				onChangePose();
+
+				poses.open();
+				morphs.open();
+
+			}
 
 			function animate() {
 
