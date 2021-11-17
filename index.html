@@ -365,7 +365,7 @@
 					}
 					else {
 						controls[ key ] = standardlist[ key ];
-						console.log(controls[ key ]);
+						//console.log(controls[ key ]);
 						//stdlocal[i] = standardlist[ key ];
 					}
 					i++;
@@ -390,11 +390,21 @@
 			function deletedGUI(){
                 //htmlCollection = doc.getElementsByXXX();
                 let tag = document.getElementsByClassName("dg main a taller-than-window");
+				//let tag2 = document.getElementsByClassName("dg main a");
                 let i=0, n=0;
                 console.log(tag);
                 n = tag.length;
                 for(i=0; i < n; i++){
                     tag[0].parentNode.removeChild(tag[0]);
+					//tag2[0].parentNode.removeChild(tag2[0]);
+                }
+
+				let tag2 = document.getElementsByClassName("dg main a");
+                let i2=0, n2=0;
+                console.log(tag2);
+                n2 = tag2.length;
+                for(i2=0; i2 < n2; i2++){
+                    tag2[0].parentNode.removeChild(tag2[0]);
                 }
             }
 
@@ -418,7 +428,7 @@
 					deletedGUI();
 					//readJSON();
 					modelLoader();
-					//initGui2();
+					//initGui();
 				}
 				if (event.keyCode == 68) {
                		console.log('you click D!');
@@ -434,7 +444,7 @@
 					deletedGUI();
 					//readJSON(); 
 					modelLoader();    
-					//initGui2();	    
+					//initGui();	    
 				}
 			}
 
@@ -443,7 +453,7 @@
                 for(let i = 0; i < 37; i++) {
 					modelList[textarray[i]] = stdlocal[i];
 				}
-				console.log(modelList);	
+				//console.log(modelList);	
 			}
 
 			function saveJSONFile() {
@@ -513,7 +523,7 @@
 					}
 					//loadVpd();
 				}, onProgress, null);
-
+				initGui();
 				readJSON();
 			}
 
@@ -553,11 +563,22 @@
 				}
 			}
 
+			var body = document.body;
+			function goRocket(e) {
+				if(e.keyCode == 80) {
+					for(let i = 0; i < 37; i++) {
+						console.log(textarray[i], stdlocal[i]);
+					}
+				}
+			}
+			body.addEventListener('keydown', goRocket, false);
+
 			function initGui() {
 
 				const gui = new GUI();
 
 				const dictionary = mesh.morphTargetDictionary;
+				console.log(mesh.morphTargetDictionary);
 
 				const controls = {};
 				const keys = [];
@@ -650,19 +671,6 @@
 					}
 
 				}
-
-				var body = document.body;
-				function goRocket(e) {
-					if(e.keyCode == 80) {
-						for(let i = 0; i < 37; i++) {
-							console.log(textarray[i], stdlocal[i]);
-							//modelList[textarray[i]] = stdlocal[i];
-							//console.log(modelList.eyebrow_troubled_left);	
-						}
-						//console.log(modelList);	
-					}
-				}
-				body.addEventListener('keydown', goRocket, false);
 
 				initControls();
 				initKeys();
