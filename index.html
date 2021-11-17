@@ -40,7 +40,7 @@
 			so.addChild("回答問題", 2, true);
 			so.addChild("當GUI的數值改變時，須將數值記錄起來", 2, true);
 			so.addChild("可使用按鍵P顯示目前紀錄的值", 1, true);
-			so.addChild("紀錄的數值儲存為JSON檔", 2, false);
+			so.addChild("紀錄的數值儲存為JSON檔", 2, true);
 			so.addChild("可按鍵選擇上 / 下一隻角色，角色morph也要改變", 1, false);
 
 			//產生自評表，參數如下所示
@@ -95,7 +95,20 @@
                                ,eye_raised_lower_eyelid_left:0,eye_raised_lower_eyelid_right:0,eye_surprised_left:0,eye_surprised_right:0,iris_small_left:0,iris_small_right:0
                                ,mouth_aaa:0,mouth_iii:0,mouth_uuu:0,mouth_eee:0,mouth_ooo:0,mouth_delta:0,mouth_smirk:0,mouth_raised_corner_left:0,mouth_raised_corner_right:0
 							   ,mouth_lowered_corner_left:0,mouth_lowered_corner_right:0};
+			var modelList = {eyebrow_troubled_left: 0, eyebrow_troubled_right:0,eyebrow_angry_left:0,eyebrow_angry_right:0,eyebrow_serious_left:0,eyebrow_serious_right:0,eyebrow_happy_left:0
+                               ,eyebrow_happy_right:0,eyebrow_lowered_left:0,eyebrow_lowered_right:0,eyebrow_raised_left:0,eyebrow_raised_right:0,eye_wink_left:0
+                               ,eye_wink_right:0,eye_happy_wink_left:0,eye_happy_wink_right:0,eye_relaxed_left:0,eye_relaxed_right:0,eye_unimpressed_left:0,eye_unimpressed_right:0
+                               ,eye_raised_lower_eyelid_left:0,eye_raised_lower_eyelid_right:0,eye_surprised_left:0,eye_surprised_right:0,iris_small_left:0,iris_small_right:0
+                               ,mouth_aaa:0,mouth_iii:0,mouth_uuu:0,mouth_eee:0,mouth_ooo:0,mouth_delta:0,mouth_smirk:0,mouth_raised_corner_left:0,mouth_raised_corner_right:0
+							   ,mouth_lowered_corner_left:0,mouth_lowered_corner_right:0,location:""};
             var stdlocal = [];
+
+			let modelState = 1;
+			let modelFile = [
+			    'models/mmd/るいのれ式物述有栖_配布用フォルダ/物述有栖.pmx',
+			    'models/mmd/KizunaAI_ver1.01/KizunaAI_ver1.01/kizunaai.pmx',
+                'models/mmd/『天宮こころ(Kokoro Amamiya)』/『天宮こころ(Kokoro Amamiya)』.pmx'
+		    ];
 
 			const vpds = [];
 
@@ -169,49 +182,39 @@
 
 				helper = new MMDAnimationHelper();
 
+				//modelLoader();
 				const loader = new MMDLoader();
 
 				loader.load( modelFile, function ( object ) {
-
 					mesh = object;
 					mesh.position.y = - 10;
-
+                	mesh.name = "mesh";
+					scene.remove( scene.getObjectByName("mesh"));
 					scene.add( mesh );
-
 					let vpdIndex = 0;
 
 					function loadVpd() {
-
 						const vpdFile = vpdFiles[ vpdIndex ];
-
 						loader.loadVPD( vpdFile, false, function ( vpd ) {
-
 							vpds.push( vpd );
-
 							vpdIndex ++;
 
 							if ( vpdIndex < vpdFiles.length ) {
-
 								loadVpd();
-
 							} else {
-
 								initGui();
-
 							}
-
 						}, onProgress, null );
-
 					}
 
 					loadVpd();
-
 				}, onProgress, null );
+
 				//鏡頭控制
-			const cameracontrols = new OrbitControls(camera, renderer.domElement);
-			cameracontrols.minDistance = 10;
-			cameracontrols.maxDistance = 100;
-			cameracontrols.enableRotate = false;
+				const cameracontrols = new OrbitControls(camera, renderer.domElement);
+				cameracontrols.minDistance = 10;
+				cameracontrols.maxDistance = 100;
+				cameracontrols.enableRotate = false;
 				//
 
 				window.addEventListener( 'resize', onWindowResize );
@@ -319,7 +322,10 @@
 						if(e.keyCode == 80) {
 							for(let i = 0; i < 37; i++) {
 								console.log(textarray[i], stdlocal[i]);
+								//modelList[textarray[i]] = stdlocal[i];
+								//console.log(modelList.eyebrow_troubled_left);	
 							}
+							//console.log(modelList);	
 						}
 					}
 					body.addEventListener('keydown', goRocket, false);
@@ -343,10 +349,14 @@
 				const gui2 = new GUI;
 				const controls = {};
 				const stdlist = gui2.addFolder('stdlist');
+
 				for (const key in standardlist) {
                     controls[ key ] = -1;  //初始值 = -1
 				}
 				for (const key in standardlist) {
+					//stdlist.name = "stdlist";
+				    //scene.remove( scene.getObjectByName("stdlist"));
+
                     stdlist.add(controls, key).onChange(onchangelocal);
 				}
                 function onchangelocal() {
@@ -360,7 +370,81 @@
 				stdlist.open(); //在開啟網頁的時候直接展開
 			}
 
-			//function initKey
+			document.onkeydown = function(event) {
+				if (event.keyCode == 83) {
+                	console.log('you click S!');
+					makeJSON();
+					saveJSONFile();
+				}
+				if (event.keyCode == 65) {
+                	console.log('you click A!');
+                    if(modelState == 0) {
+						modelState = 2;
+					}  
+					else if(modelState == 1) {
+						modelState = 0;
+					}
+					else if(modelState == 2) {
+						modelState = 1;
+					}  
+					modelLoader();
+					//initGui2();
+				}
+				if (event.keyCode == 68) {
+               		console.log('you click D!');
+					if(modelState == 0) {
+                   		modelState = 1;
+					}    
+					else if(modelState == 1) {
+                    	modelState = 2;
+					}     	    
+					else if(modelState == 2) {
+                    	modelState = 0;
+					}	 
+					modelLoader();    
+					//initGui2();	    
+				}
+			}
+
+			function makeJSON() {
+				modelList.location = modelFile[modelState];
+                for(let i = 0; i < 37; i++) {
+					modelList[textarray[i]] = stdlocal[i];
+				}
+				console.log(modelList);	
+			}
+
+			function saveJSONFile() {
+				var data = JSON.stringify(modelList);
+				var outputFile;
+				if(modelState == 0) {
+					outputFile = "物述有栖_37Data.json";
+				}
+				else if(modelState == 1) {
+					outputFile = "kizunaai_37Data.json";
+				}
+				else if(modelState == 2){
+					outputFile = "天宮こころ_37Data.json";
+				}
+				console.log(outputFile);
+
+				var file = new Blob([data], {type: "application/json"});
+				if (window.navigator.msSaveOrOpenBlob) // work on IE10+
+					window.navigator.msSaveOrOpenBlob(file, outputFile);
+				else { // Others like google chrome
+					console.log("ping!");
+					var a = document.createElement("a"),
+							url = URL.createObjectURL(file);
+					a.href = url;
+					a.download = outputFile;
+					document.body.appendChild(a);
+					a.click();
+					setTimeout(function() {
+						document.body.removeChild(a);
+						window.URL.revokeObjectURL(url);  
+					}, 0); 
+            	}
+			}
 
 			function onWindowResize() {
 
@@ -371,7 +455,40 @@
 
 			}
 
-			//
+			function modelLoader() {
+				const loader = new MMDLoader();
+
+				loader.load(modelFile[modelState], function (object) {
+					mesh = object;
+					mesh.position.y = - 10;
+                	mesh.name = "mesh";
+					scene.remove( scene.getObjectByName("mesh"));
+					scene.add(mesh);
+					let vpdIndex = 0;
+
+					function loadVpd() {
+						const vpdFile = vpdFiles[vpdIndex];
+
+						loader.loadVPD(vpdFile, false, function (vpd) {
+							vpds.push(vpd);
+							vpdIndex++;
+							if (vpdIndex < vpdFiles.length) {
+								loadVpd();
+							} else {
+								initGui();
+							}
+						}, onProgress, null);
+					}
+					//loadVpd();
+				}, onProgress, null);
+			}
+
+			function onProgress(xhr) {
+            	if (xhr.lengthComputable) {
+	           		const percentComplete = xhr.loaded / xhr.total * 100;
+	            	console.log(Math.round(percentComplete, 2) + '% downloaded');
+            	}
+        	}
 
 			function animate() {
 
